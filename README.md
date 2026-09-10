@@ -51,7 +51,7 @@ time to get the full list:
 npm run check-placeholders
 ```
 
-At the time of writing, that's **46 bracketed values** in `content/site.ts` —
+At the time of writing, that's **45 bracketed values** in `content/site.ts` —
 sites-launched / countries / avg. days / rating counters, all three
 `AED [ ]` prices, revision-round and project-count numbers, the six sample
 work items' years and one-line results, all four testimonials, the three
@@ -59,20 +59,23 @@ budget-range chip labels, and the "reply within [X] hours" / "launch in [X]
 days" copy. Each renders with a dashed outline on the live site so an unfilled
 one is never mistaken for a real figure.
 
-Three more things aren't bracketed but are still placeholders:
+Contact details: email (`shaheen@urfolio.net`) and WhatsApp
+(`+963 988 824 456`) are set and live. **Social links**
+(`contact.socials[].href` — Instagram/LinkedIn/Behance) are still empty on
+purpose and render as disabled/dashed links until filled in (see
+`src/lib/contact-links.ts`).
 
-- **`contact.email`, `contact.whatsapp`, `contact.socials[].href`** — left
-  empty on purpose. A fabricated WhatsApp number in a live `wa.me` link could
-  reach a real, unrelated person, so these render as disabled/dashed links
-  until filled in (see `src/lib/contact-links.ts`).
+Two more things aren't bracketed but are still placeholders:
+
 - **`src/lib/config.ts`**:
-  - `TYPEKIT_KIT_ID` — paste your Adobe Fonts kit ID once you have it. Until
-    then the site renders on a metric-matched fallback (`globals.css`), and
-    the fallback's `size-adjust`/`ascent-override` values are estimates, not
-    a measured match — see the note in that file once the real kit is live.
-  - `SITE_URL` — a placeholder domain (`https://urfolio.example`), used for
-    canonical links, the sitemap and absolute OG image URLs. Set it once you
-    have a real domain.
+  - `TYPEKIT_KIT_ID` — skipped for now. The site renders on a
+    metric-matched fallback (`globals.css`), and that fallback's
+    `size-adjust`/`ascent-override` values are estimates, not a measured
+    match — see the note in that file once a real kit is set.
+  - `SITE_URL` is set to `https://urfolio.net` — the intended domain,
+    **not purchased yet**. Canonical links, the sitemap and the OG image
+    already point there; nothing else needs to change once it's bought and
+    pointed at wherever this is hosted.
   - `FORMSPREE_ENDPOINT` — empty. The brief form (`Contact.tsx` →
     `submitBrief()`) posts here; without it, submitting the form correctly
     shows "Form isn't connected yet" and offers the WhatsApp link instead of

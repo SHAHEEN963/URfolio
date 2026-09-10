@@ -470,13 +470,12 @@ export type Contact = {
 };
 
 export const contact: Contact = {
-  // Left empty on purpose — see components/ui/Placeholder.tsx `whatsappHref`
-  // and `mailHref`. A fabricated phone number in a live wa.me link could
-  // reach a real, unrelated person, so these render as disabled placeholders
-  // until filled in.
-  email: "",
-  whatsapp: "",
-  whatsappDisplay: "[WhatsApp number]",
+  email: "shaheen@urfolio.net",
+  whatsapp: "+963988824456",
+  whatsappDisplay: "+963 988 824 456",
+  // Social links left empty on purpose — see components/ui/Placeholder.tsx
+  // and lib/contact-links.ts `mailHref`/`whatsappHref`. Each renders as a
+  // disabled placeholder until a real URL is filled in.
   socials: [
     { id: "instagram", label: "Instagram", href: "" },
     { id: "linkedin", label: "LinkedIn", href: "" },

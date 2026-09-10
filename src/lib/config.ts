@@ -12,9 +12,10 @@ export const TYPEKIT_KIT_ID = "";
 
 /**
  * Canonical domain, used for metadata, sitemap.xml and absolute OG/Twitter
- * image URLs. Placeholder until a real domain is chosen (see Phase 0, flag 12).
+ * image URLs. urfolio.net is the intended domain but isn't purchased yet —
+ * update nothing else once it is, this is the only place it's referenced.
  */
-export const SITE_URL = "https://urfolio.example";
+export const SITE_URL = "https://urfolio.net";
 
 /**
  * Formspree endpoint for the brief form (see submit-brief.ts). Static export

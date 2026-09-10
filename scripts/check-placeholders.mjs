@@ -47,6 +47,17 @@ console.log(`${found.length} placeholder value(s) in content/site.ts:\n`);
 for (const { path, value } of found) {
   console.log(`  ${path.padEnd(48)} ${JSON.stringify(value)}`);
 }
-console.log("\nAlso check: contact.email / contact.whatsapp / contact.socials[].href");
-console.log("(empty strings, not bracketed — they render as disabled placeholders).");
+
+// contact.email/whatsapp/socials[].href are empty strings rather than
+// `[bracketed]` text when unfilled, so the walk above never catches them —
+// checked separately here.
+const emptyContactFields = [
+  !site.contact.email && "contact.email",
+  !site.contact.whatsapp && "contact.whatsapp",
+  ...site.contact.socials.filter((s) => !s.href).map((s) => `contact.socials["${s.id}"].href`),
+].filter(Boolean);
+
+if (emptyContactFields.length > 0) {
+  console.log(`\nAlso empty (render as disabled placeholders): ${emptyContactFields.join(", ")}`);
+}
 process.exit(1);
