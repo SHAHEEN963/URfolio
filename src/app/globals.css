@@ -1,0 +1,306 @@
+@import "tailwindcss";
+
+/* ────────────────────────────────────────────────────────────────────────
+   Brand palette (public/brand/color.svg) + derived neutrals.
+   Phase 0 plan §2 "Colour". Kept as plain :root vars (not baked into
+   @theme) so the semantic layer below can re-point them per surface.
+   ──────────────────────────────────────────────────────────────────────── */
+:root {
+  --mauve: #8f7277;
+  --caramel: #d6a274;
+  --cocoa: #6b4438;
+  --plum: #7c5257;
+  --clay: #a2715f;
+
+  --espresso: #1b1412;
+  --espresso-2: #251b18;
+  --espresso-3: #30231f;
+  --paper: #f2eae6;
+  --paper-2: #e7dbd5;
+
+  --fg-muted-dark: #b6aeab; /* paper @ ~72% on espresso, ≈8.3:1 */
+  --line-dark: rgb(from var(--mauve) r g b / 32%);
+  --line-paper: rgb(from var(--cocoa) r g b / 22%);
+
+  /* Semantic layer — components read these, sections point them at a surface. */
+  --bg: var(--espresso);
+  --bg-raised: var(--espresso-2);
+  --bg-raised-2: var(--espresso-3);
+  --fg: var(--paper);
+  --fg-muted: var(--fg-muted-dark);
+  --line: var(--line-dark);
+  --accent: var(--caramel);
+  --accent-fg: var(--espresso);
+}
+
+[data-surface="paper"] {
+  --bg: var(--paper);
+  --bg-raised: var(--paper-2);
+  --bg-raised-2: color-mix(in srgb, var(--paper-2) 85%, var(--cocoa) 15%);
+  --fg: var(--cocoa);
+  --fg-muted: var(--plum);
+  --line: var(--line-paper);
+}
+
+@theme inline {
+  --color-mauve: var(--mauve);
+  --color-caramel: var(--caramel);
+  --color-cocoa: var(--cocoa);
+  --color-plum: var(--plum);
+  --color-clay: var(--clay);
+  --color-espresso: var(--espresso);
+  --color-espresso-2: var(--espresso-2);
+  --color-espresso-3: var(--espresso-3);
+  --color-paper: var(--paper);
+  --color-paper-2: var(--paper-2);
+
+  --color-bg: var(--bg);
+  --color-bg-raised: var(--bg-raised);
+  --color-fg: var(--fg);
+  --color-fg-muted: var(--fg-muted);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-accent-fg: var(--accent-fg);
+
+  --radius-sm: 4px;
+  --radius-md: 14px;
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+   Type. Single family everywhere — hierarchy comes from the scale below,
+   not from switching fonts. Vesterbro loads from Adobe Fonts once
+   TYPEKIT_KIT_ID (lib/config.ts) is set; until then this renders on the
+   metric-matched fallback so body copy doesn't visibly reflow when it does.
+   ──────────────────────────────────────────────────────────────────────── */
+@font-face {
+  font-family: "URfolio Fallback";
+  src: local("Arial"), local("Helvetica Neue"), local("Segoe UI");
+  font-weight: 400 700;
+  /*
+   * TODO once TYPEKIT_KIT_ID is live: measure Vesterbro's real ascent,
+   * descent and units-per-em (e.g. with a tool like Fontaine) and replace
+   * these — they're a reasonable humanist-sans starting point, not a
+   * measured match, so headline line-boxes may still shift slightly today.
+   */
+  size-adjust: 104%;
+  ascent-override: 92%;
+  descent-override: 24%;
+  line-gap-override: 0%;
+}
+
+:root {
+  --font-body: vesterbro-vf, "URfolio Fallback", ui-sans-serif, system-ui, sans-serif;
+
+  --fs-display: clamp(5.5rem, 0.6rem + 21vw, 25rem);
+  --fs-hero: clamp(2.75rem, 1.5rem + 4.4vw, 7rem);
+  --fs-h2: clamp(2.25rem, 1.25rem + 3.4vw, 5.25rem);
+  --fs-statement: clamp(1.75rem, 0.9rem + 3vw, 4.25rem);
+  --fs-h3: clamp(1.375rem, 1.1rem + 1vw, 2.125rem);
+  --fs-lead: clamp(1.125rem, 1.02rem + 0.45vw, 1.375rem);
+  --fs-body: clamp(1rem, 0.93rem + 0.31vw, 1.125rem);
+  --fs-small: 0.875rem;
+  --fs-micro: 0.8125rem;
+
+  --space-section: clamp(5rem, 2.5rem + 8vw, 11rem);
+  --space-gutter: clamp(1.25rem, 0.6rem + 2.8vw, 3.5rem);
+  --container-max: 1760px;
+
+  /* Motion — mirrors lib/motion.ts so CSS transitions and GSAP tweens match. */
+  --ease-enter: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-ui: cubic-bezier(0.215, 0.61, 0.355, 1);
+  --ease-wipe: cubic-bezier(0.87, 0, 0.13, 1);
+  --dur-ui: 0.4s;
+  --dur-enter: 0.8s;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  /* The page stays dark-first throughout; paper is a section, not a theme
+     switch, so color-scheme never flips. */
+  color-scheme: dark;
+}
+
+body {
+  font-family: var(--font-body);
+  font-variation-settings: normal;
+  background: var(--espresso);
+  color: var(--paper);
+  font-size: var(--fs-body);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  font-weight: 700;
+  line-height: 1;
+}
+
+::selection {
+  background: var(--caramel);
+  color: var(--espresso);
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--espresso-2);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--clay);
+  border-radius: 999px;
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+   Type-scale utilities. Named classes rather than long arbitrary-value
+   chains, since every one of these pairs a fluid size with a specific
+   line-height and tracking.
+   ──────────────────────────────────────────────────────────────────────── */
+.text-display {
+  font-size: var(--fs-display);
+  line-height: 0.8;
+  letter-spacing: -0.05em;
+}
+.text-hero {
+  font-size: var(--fs-hero);
+  line-height: 0.94;
+  letter-spacing: -0.035em;
+}
+.text-h2 {
+  font-size: var(--fs-h2);
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+.text-statement {
+  font-size: var(--fs-statement);
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+}
+.text-h3 {
+  font-size: var(--fs-h3);
+  line-height: 1.1;
+  letter-spacing: -0.015em;
+}
+.text-lead {
+  font-size: var(--fs-lead);
+  line-height: 1.45;
+}
+.text-small {
+  font-size: var(--fs-small);
+  line-height: 1.45;
+  letter-spacing: 0.005em;
+}
+.text-micro {
+  font-size: var(--fs-micro);
+  line-height: 1.3;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.measure {
+  max-width: 66ch;
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+   Layout primitives.
+   ──────────────────────────────────────────────────────────────────────── */
+.container {
+  max-width: var(--container-max);
+  margin-inline: auto;
+  padding-inline: var(--space-gutter);
+}
+.section {
+  padding-block: var(--space-section);
+}
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.skip-link {
+  position: fixed;
+  top: -100%;
+  left: 1rem;
+  z-index: 100;
+  background: var(--caramel);
+  color: var(--espresso);
+  padding: 0.75rem 1.25rem;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+}
+.skip-link:focus {
+  top: 1rem;
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+   Placeholder styling — brief §4: render placeholders visibly, never
+   invent real numbers/clients/testimonials.
+   ──────────────────────────────────────────────────────────────────────── */
+.ph-inline {
+  border-bottom: 1.5px dashed currentColor;
+  opacity: 0.75;
+  cursor: help;
+}
+.ph-block {
+  border: 1.5px dashed currentColor;
+  border-radius: var(--radius-sm);
+  opacity: 0.85;
+  padding-inline: 0.4em;
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+   Focus rings. Caramel alone is only 1.9:1 on paper (fails WCAG 1.4.11), so
+   paper sections get a double ring — Phase 0 flag 8.
+   ──────────────────────────────────────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--caramel);
+  outline-offset: 3px;
+  border-radius: var(--radius-sm);
+}
+[data-surface="paper"] :focus-visible {
+  outline: 2px solid var(--caramel);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 5px var(--espresso);
+}
+
+/* Footer wordmark weight-shift on hover — a no-op today on the fallback
+   font, activates automatically once Vesterbro (a variable font) loads, if
+   its kit exposes a wght axis (Phase 0 plan flag 1). Variable font axes are
+   explicitly allowed to animate alongside transform/opacity/clip-path. */
+.footer-wordmark {
+  transition: font-variation-settings var(--dur-ui) var(--ease-ui);
+}
+.footer-wordmark:hover {
+  font-variation-settings: "wght" 700;
+}
+
+/* Anti-flash for the preloader (see layout.tsx's head script + Preloader.tsx):
+   a repeat visit or reduced motion stamps this attribute on <html> before
+   body even exists, so the preloader is never painted, not just hidden late. */
+html[data-preloader="skip"] #urfolio-preloader {
+  display: none;
+}
+
+/* Reduced motion: signature moments and scroll-driven effects short-circuit
+   to their finished state in each component; this just kills leftover CSS
+   transitions/animations globally as a backstop. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
