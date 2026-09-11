@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { proof, isPh } from "@/content/site";
-import { gsapEase } from "@/lib/motion";
+import { gsapEase, stagger } from "@/lib/motion";
 import { useReducedMotion } from "@/lib/useReducedMotion";
 
 // ─── Counters ──────────────────────────────────────────────────────────
@@ -34,7 +34,7 @@ function Counter({ value, suffix, label }: { value: number | string; suffix: str
   }, [value, reduced]);
 
   return (
-    <div>
+    <div data-stat>
       <p className="text-h2 text-fg">
         {isPh(value) ? (
           <span className="ph-block">{value}</span>
@@ -52,49 +52,87 @@ function Counter({ value, suffix, label }: { value: number | string; suffix: str
   );
 }
 
-// ─── Testimonial slider ────────────────────────────────────────────────
+// ─── Testimonial 3D stack ──────────────────────────────────────────────
 
-function TestimonialSlider() {
-  const trackRef = useRef<HTMLDivElement>(null);
-  const [index, setIndex] = useState(0);
-  const total = proof.testimonials.length;
+const TOTAL = proof.testimonials.length;
 
-  const goTo = (i: number) => {
-    const track = trackRef.current;
-    if (!track) return;
-    const clamped = (i + total) % total;
-    track.children[clamped]?.scrollIntoView({ behavior: "smooth", inline: "start", block: "nearest" });
+/** Depth styling per position in the ring, 0 = front. Alternating rotation gives a fanned, not lopsided, stack. */
+function depthStyle(offset: number) {
+  const dir = offset % 2 === 0 ? -1 : 1;
+  return {
+    z: offset === 0 ? 0 : -40 - (offset - 1) * 38,
+    y: offset === 0 ? 0 : 10 + (offset - 1) * 8,
+    scale: 1 - offset * 0.055,
+    rotationY: offset === 0 ? 0 : dir * (6 + (offset - 1) * 2),
+    opacity: offset === 0 ? 1 : Math.max(0.1, 0.52 - (offset - 1) * 0.2),
+    zIndex: TOTAL - offset,
   };
+}
+
+function TestimonialStack() {
+  const [index, setIndex] = useState(0);
+  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const positioned = useRef(false);
+  const touchStartX = useRef<number | null>(null);
+  const reduced = useReducedMotion();
+
+  const goTo = (i: number) => setIndex((i + TOTAL) % TOTAL);
 
   useEffect(() => {
-    const track = trackRef.current;
-    if (!track) return;
-    const onScroll = () => {
-      const i = Math.round(track.scrollLeft / track.clientWidth);
-      setIndex(Math.min(total - 1, Math.max(0, i)));
-    };
-    track.addEventListener("scroll", onScroll, { passive: true });
-    return () => track.removeEventListener("scroll", onScroll);
-  }, [total]);
+    const cards = cardRefs.current;
+    cards.forEach((card, i) => {
+      if (!card) return;
+      const offset = (i - index + TOTAL) % TOTAL;
+      const target = depthStyle(offset);
+      if (!positioned.current || reduced) {
+        gsap.set(card, target);
+      } else {
+        gsap.to(card, { ...target, duration: 0.6, ease: gsapEase.enter });
+      }
+    });
+    positioned.current = true;
+  }, [index, reduced]);
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+  const onTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null) return;
+    const delta = e.changedTouches[0].clientX - touchStartX.current;
+    if (Math.abs(delta) > 40) goTo(index + (delta < 0 ? 1 : -1));
+    touchStartX.current = null;
+  };
 
   return (
-    <div className="mx-auto w-full max-w-xl text-center">
+    <div className="mx-auto w-full max-w-xl">
       <div
-        ref={trackRef}
-        className="flex snap-x snap-mandatory overflow-x-auto scroll-smooth text-left [scrollbar-width:none]"
-        role="region"
-        aria-label="Client testimonials"
+        className="relative mx-auto h-[210px] sm:h-[180px]"
+        style={{ perspective: "1200px" }}
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEnd}
       >
-        {proof.testimonials.map((t) => (
-          <div key={t.id} className="w-full shrink-0 snap-start px-1 text-center">
-            <p className="text-lead text-fg">“{t.quote}”</p>
-            <p className="text-small text-fg-muted mt-4">
-              {t.name} — {t.role}
-            </p>
-          </div>
-        ))}
+        {proof.testimonials.map((t, i) => {
+          const isFront = i === index;
+          return (
+            <div
+              key={t.id}
+              ref={(el) => {
+                cardRefs.current[i] = el;
+              }}
+              aria-hidden={!isFront}
+              className="absolute inset-0 flex flex-col items-center justify-center rounded-[var(--radius-md)] border border-[var(--line)] bg-[var(--bg-raised)] px-6 py-6 text-center will-change-transform"
+              style={{ pointerEvents: isFront ? "auto" : "none" }}
+            >
+              <p className="text-lead text-fg">“{t.quote}”</p>
+              <p className="text-small text-fg-muted mt-4">
+                {t.name} — {t.role}
+              </p>
+            </div>
+          );
+        })}
       </div>
-      <div className="mt-6 flex items-center justify-center gap-4">
+
+      <div className="mt-6 flex items-center justify-center gap-4" role="group" aria-label="Client testimonials">
         <button
           type="button"
           onClick={() => goTo(index - 1)}
@@ -103,8 +141,8 @@ function TestimonialSlider() {
         >
           ‹
         </button>
-        <span className="text-micro text-fg-muted tabular-nums">
-          {String(index + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}
+        <span className="text-micro text-fg-muted tabular-nums" aria-live="polite">
+          {String(index + 1).padStart(2, "0")} / {String(TOTAL).padStart(2, "0")}
         </span>
         <button
           type="button"
@@ -123,16 +161,18 @@ export function Proof() {
   const rootRef = useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion();
 
+  // Entrance: stat blocks rise in a stagger as a group; the testimonial
+  // stack fades in on its own right after.
   useEffect(() => {
     const root = rootRef.current;
     if (!root || reduced) return;
     gsap.registerPlugin(ScrollTrigger);
+    const stats = root.querySelectorAll<HTMLElement>("[data-stat]");
+    const stack = root.querySelector<HTMLElement>("[data-stack]");
     const ctx = gsap.context(() => {
-      gsap.fromTo(
-        root,
-        { opacity: 0, y: 24 },
-        { opacity: 1, y: 0, duration: 0.8, ease: gsapEase.enter, scrollTrigger: { trigger: root, start: "top 80%" } }
-      );
+      const tl = gsap.timeline({ scrollTrigger: { trigger: root, start: "top 80%" } });
+      tl.fromTo(stats, { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.7, ease: gsapEase.enter, stagger: stagger.rows });
+      if (stack) tl.fromTo(stack, { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.6, ease: gsapEase.enter }, "-=0.3");
     }, root);
     return () => ctx.revert();
   }, [reduced]);
@@ -145,10 +185,8 @@ export function Proof() {
             <Counter key={i} value={m.value} suffix={m.suffix} label={m.label} />
           ))}
         </div>
-        {/* The live performance instrument panel was removed — the
-            testimonial slider is centred on its own below the stats row. */}
-        <div className="mt-16 flex justify-center">
-          <TestimonialSlider />
+        <div className="mt-16 flex justify-center" data-stack>
+          <TestimonialStack />
         </div>
       </div>
     </section>
