@@ -1,7 +1,7 @@
 "use client";
 
 import { useId, useState } from "react";
-import { faq } from "@/content/site";
+import { useSiteContent } from "@/lib/site-content";
 import { AutoPlaceholder } from "@/components/ui/Placeholder";
 
 /**
@@ -14,6 +14,7 @@ import { AutoPlaceholder } from "@/components/ui/Placeholder";
  * exception, same as the brief's own accordion ask implies.
  */
 export function Faq() {
+  const { faq } = useSiteContent();
   const [openId, setOpenId] = useState<string | null>(null);
   const baseId = useId();
 

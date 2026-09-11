@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { gsap } from "gsap";
-import { contactForm, contact, type Audience } from "@/content/site";
+import type { Audience } from "@/content/site";
+import { useSiteContent } from "@/lib/site-content";
 import { Chip } from "@/components/ui/Chip";
 import { Button } from "@/components/ui/Button";
 import { useSiteState } from "@/lib/site-state";
@@ -16,6 +17,7 @@ type FieldErrors = { name?: string; email?: string; iAm?: string; need?: string;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function Contact() {
+  const { contactForm, contact } = useSiteContent();
   const { audience, setAudience, planId } = useSiteState();
   const [need, setNeed] = useState<string | null>(null);
   const [plan, setPlan] = useState<string | null>(null);

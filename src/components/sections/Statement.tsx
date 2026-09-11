@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { statement } from "@/content/site";
+import { useSiteContent } from "@/lib/site-content";
 import { useReducedMotion } from "@/lib/useReducedMotion";
 
 /**
@@ -13,6 +13,7 @@ import { useReducedMotion } from "@/lib/useReducedMotion";
  * animates (never `color`), per the motion rules.
  */
 export function Statement() {
+  const { statement } = useSiteContent();
   const words = statement.text.split(" ");
   const rootRef = useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion();

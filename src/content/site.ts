@@ -35,6 +35,10 @@ export const nav = {
 
 // ─── Hero ────────────────────────────────────────────────────────────────
 
+/** The sample name/role/domain shown in the hero's live preview — also
+ *  reused as-is by the Before/After section, so they stay in sync. */
+export type Persona = { name: string; role: string; domain: string };
+
 export const hero = {
   toggle: { individual: "Individual", company: "Company" },
   headline: ["Your portfolio.", "Built with AI,", "finished by hand."],
@@ -51,7 +55,7 @@ export const hero = {
   preview: {
     individual: { name: "Lina Haddad", role: "Brand Photographer", domain: "lina-haddad.com" },
     company: { name: "Northline Studio", role: "Architecture & Interiors", domain: "northline-studio.com" },
-  } satisfies Record<Audience, { name: string; role: string; domain: string }>,
+  } satisfies Record<Audience, Persona>,
   previewStatus: ["Drafting layout…", "Applying your palette…", "Publishing…", "Published"],
 };
 
@@ -151,11 +155,13 @@ export const process: { heading: string; steps: ProcessStep[] } = {
 
 // ─── Work ────────────────────────────────────────────────────────────────
 
-export type WorkType = "Personal" | "Company";
+/** "Personal" and "Company" are the two the site was designed around, but
+ *  this stays a plain string (not a closed union) so the dashboard can add
+ *  a work item with any label without a code change. */
+export type WorkType = string;
 
 export type WorkItem = {
   id: string;
-  number: string;
   title: string;
   type: WorkType;
   year: string;
@@ -164,6 +170,8 @@ export type WorkItem = {
   result: string;
   /** External link — null until a real site exists behind this sample. */
   link: string | null;
+  /** Hidden from the public site, but kept in the dashboard's list — set from /dashboard's show/hide toggle. */
+  hidden?: boolean;
 };
 
 export const work: { heading: string; count: string; items: WorkItem[] } = {
@@ -172,7 +180,6 @@ export const work: { heading: string; count: string; items: WorkItem[] } = {
   items: [
     {
       id: "photographer",
-      number: "01",
       title: "Brand photographer · sample",
       type: "Personal",
       year: "2025",
@@ -182,7 +189,6 @@ export const work: { heading: string; count: string; items: WorkItem[] } = {
     },
     {
       id: "architecture",
-      number: "02",
       title: "Architecture studio · sample",
       type: "Company",
       year: "2025",
@@ -192,7 +198,6 @@ export const work: { heading: string; count: string; items: WorkItem[] } = {
     },
     {
       id: "product-designer",
-      number: "03",
       title: "Product designer · sample",
       type: "Personal",
       year: "2024",
@@ -202,7 +207,6 @@ export const work: { heading: string; count: string; items: WorkItem[] } = {
     },
     {
       id: "coffee-roaster",
-      number: "04",
       title: "Specialty coffee roaster · sample",
       type: "Company",
       year: "2025",
@@ -212,7 +216,6 @@ export const work: { heading: string; count: string; items: WorkItem[] } = {
     },
     {
       id: "consultant",
-      number: "05",
       title: "Management consultant · sample",
       type: "Personal",
       year: "2024",
@@ -222,7 +225,6 @@ export const work: { heading: string; count: string; items: WorkItem[] } = {
     },
     {
       id: "engineer",
-      number: "06",
       title: "Software engineer · sample",
       type: "Personal",
       year: "2025",
@@ -239,7 +241,8 @@ export const beforeAfter = {
   heading: "Same person. Same work. Different first impression.",
   toggle: { without: "Without URfolio", with: "With URfolio" },
   caption: { without: "Easy to ignore.", with: "Hard to forget." },
-  persona: hero.preview.individual,
+  // No separate persona field on purpose: this reuses hero.preview.individual
+  // (edited on the Hero tab) so the two stay in sync — see BeforeAfter.tsx.
 };
 
 // ─── Proof ───────────────────────────────────────────────────────────────
@@ -292,10 +295,13 @@ export const proof: { metrics: Metric[]; testimonials: Testimonial[]; instrument
 // ─── Pricing ─────────────────────────────────────────────────────────────
 
 export type PricingPlan = {
-  id: "personal" | "professional" | "company";
+  /** A plain string (not a closed union) so the dashboard can add a plan
+   *  with a new id without a code change. */
+  id: string;
   name: string;
   price: Maybe<"[ ]">;
-  currency: "AED";
+  /** A plain string (not a closed union) so it can be edited from the dashboard. */
+  currency: string;
   featured: boolean;
   features: string[];
   cta: string;
@@ -486,6 +492,17 @@ export const contact: Contact = {
   ],
 };
 
+// ─── Branding ────────────────────────────────────────────────────────────
+
+export type Branding = {
+  /** Public path to an uploaded logo image, or "" to use the built-in mark. */
+  logoImage: string;
+};
+
+export const branding: Branding = {
+  logoImage: "",
+};
+
 // ─── SEO ─────────────────────────────────────────────────────────────────
 
 export const meta = {
@@ -509,7 +526,16 @@ export const site = {
   contactForm,
   footer,
   contact,
+  branding,
   meta,
 };
+
+/**
+ * The shape of everything the dashboard can edit and the site can render —
+ * this file's own default values are also the fallback the site renders
+ * from until (or whenever) the dashboard has nothing saved for a given
+ * field. See src/lib/content/store.ts.
+ */
+export type SiteContent = typeof site;
 
 export default site;

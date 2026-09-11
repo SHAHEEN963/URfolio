@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
-import { Mark } from "@/components/ui/Mark";
+import { Logo } from "@/components/ui/Logo";
 import { SparkleOverlay, SPARKLE_CENTER } from "@/components/ui/SparkleOverlay";
 import { PALETTE_BARS, BAR_BG_CLASS } from "@/lib/palette-bars";
 import { PRELOADER_SEEN_KEY } from "@/lib/config";
@@ -104,7 +104,7 @@ export function Preloader() {
       ))}
       <div ref={markRef} className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-0">
         <div className="relative h-20 w-20 text-paper sm:h-28 sm:w-28">
-          <Mark className="absolute inset-0" />
+          <Logo className="absolute inset-0" />
           <SparkleOverlay ref={sparkleRef} className="absolute inset-0 text-caramel" />
         </div>
       </div>

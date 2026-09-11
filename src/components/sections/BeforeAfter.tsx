@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { beforeAfter } from "@/content/site";
+import type { Persona } from "@/content/site";
+import { useSiteContent } from "@/lib/site-content";
 import { WorkVisual } from "@/components/ui/WorkVisual";
 import { BrowserFrame } from "@/components/ui/BrowserFrame";
 import { gsapEase } from "@/lib/motion";
@@ -12,11 +13,11 @@ import { useReducedMotion } from "@/lib/useReducedMotion";
 type Mode = "without" | "with";
 
 /** The cluttered CV + link-in-bio mock, desaturated. */
-function WithoutMock() {
+function WithoutMock({ persona }: { persona: Persona }) {
   return (
     <div className="grid grid-cols-2 gap-4 rotate-[-1.5deg]">
       <div className="rounded-sm bg-white/90 p-4 text-[#333] shadow-sm">
-        <p className="text-xs font-bold">{beforeAfter.persona.name}.pdf</p>
+        <p className="text-xs font-bold">{persona.name}.pdf</p>
         <div className="mt-3 space-y-1.5">
           {Array.from({ length: 7 }).map((_, i) => (
             <div key={i} className="h-1.5 rounded-full bg-[#333]/25" style={{ width: `${70 - i * 4}%` }} />
@@ -37,11 +38,11 @@ function WithoutMock() {
   );
 }
 
-function WithMock() {
+function WithMock({ persona }: { persona: Persona }) {
   return (
-    <BrowserFrame url={beforeAfter.persona.domain}>
-      <p className="text-h3 leading-tight">{beforeAfter.persona.name}</p>
-      <p className="text-fg-muted text-small">{beforeAfter.persona.role}</p>
+    <BrowserFrame url={persona.domain}>
+      <p className="text-h3 leading-tight">{persona.name}</p>
+      <p className="text-fg-muted text-small">{persona.role}</p>
       <div className="mt-4 aspect-video overflow-hidden rounded-[var(--radius-sm)]">
         <WorkVisual seed={99} className="h-full w-full" />
       </div>
@@ -53,6 +54,8 @@ const GLASS_CHIP =
   "block whitespace-nowrap rounded-full border border-[var(--line)] bg-[var(--bg)]/70 px-5 py-2 text-small font-medium text-fg backdrop-blur-md";
 
 export function BeforeAfter() {
+  const { beforeAfter, hero } = useSiteContent();
+  const persona = hero.preview.individual;
   const [mode, setMode] = useState<Mode>("without");
   const withRef = useRef<HTMLDivElement>(null);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -146,10 +149,10 @@ export function BeforeAfter() {
 
         <div ref={rootRef} className="relative mx-auto mt-8 max-w-2xl">
           <div className="relative aspect-[4/3] overflow-hidden rounded-[var(--radius-md)] bg-[var(--bg-raised)] p-6 grayscale sm:p-8">
-            <WithoutMock />
+            <WithoutMock persona={persona} />
           </div>
           <div ref={withRef} className="absolute inset-0 p-6 sm:p-8" style={{ clipPath: "circle(0% at 50% 0%)" }}>
-            <WithMock />
+            <WithMock persona={persona} />
           </div>
 
           {/* Glass caption — lives inside the card now and crossfades with

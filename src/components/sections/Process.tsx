@@ -3,11 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { process as processContent } from "@/content/site";
 import { WorkVisual } from "@/components/ui/WorkVisual";
 import { useIsTouchDevice, useReducedMotion } from "@/lib/useReducedMotion";
-
-const STEP_COUNT = processContent.steps.length;
+import { useSiteContent } from "@/lib/site-content";
 
 /** The step visual — a distinct generated composition per step. */
 function StepVisual({ index }: { index: number }) {
@@ -19,6 +17,8 @@ function StepVisual({ index }: { index: number }) {
 }
 
 export function Process() {
+  const { process: processContent } = useSiteContent();
+  const stepCount = processContent.steps.length;
   const sectionRef = useRef<HTMLElement>(null);
   const pinRef = useRef<HTMLDivElement>(null);
   const lineRef = useRef<HTMLDivElement>(null);
@@ -46,14 +46,14 @@ export function Process() {
         scrub: 0.5,
         onUpdate: (self) => {
           gsap.set(line, { scaleY: self.progress });
-          setActiveStep(Math.min(STEP_COUNT - 1, Math.floor(self.progress * STEP_COUNT)));
+          setActiveStep(Math.min(stepCount - 1, Math.floor(self.progress * stepCount)));
         },
       });
       return () => st.kill();
     }, section);
 
     return () => ctx.revert();
-  }, [pinned]);
+  }, [pinned, stepCount]);
 
   if (!pinned) {
     // Touch / reduced motion: a plain vertical list, no pinning.

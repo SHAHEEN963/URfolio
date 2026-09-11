@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { proof, isPh } from "@/content/site";
+import { isPh, type Testimonial } from "@/content/site";
+import { useSiteContent } from "@/lib/site-content";
 import { gsapEase, stagger } from "@/lib/motion";
 import { useReducedMotion } from "@/lib/useReducedMotion";
 
@@ -54,10 +55,8 @@ function Counter({ value, suffix, label }: { value: number | string; suffix: str
 
 // ─── Testimonial 3D stack ──────────────────────────────────────────────
 
-const TOTAL = proof.testimonials.length;
-
 /** Depth styling per position in the ring, 0 = front. Alternating rotation gives a fanned, not lopsided, stack. */
-function depthStyle(offset: number) {
+function depthStyle(offset: number, total: number) {
   const dir = offset % 2 === 0 ? -1 : 1;
   return {
     z: offset === 0 ? 0 : -40 - (offset - 1) * 38,
@@ -65,25 +64,26 @@ function depthStyle(offset: number) {
     scale: 1 - offset * 0.055,
     rotationY: offset === 0 ? 0 : dir * (6 + (offset - 1) * 2),
     opacity: offset === 0 ? 1 : Math.max(0.1, 0.52 - (offset - 1) * 0.2),
-    zIndex: TOTAL - offset,
+    zIndex: total - offset,
   };
 }
 
-function TestimonialStack() {
+function TestimonialStack({ testimonials }: { testimonials: Testimonial[] }) {
+  const total = testimonials.length;
   const [index, setIndex] = useState(0);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
   const positioned = useRef(false);
   const touchStartX = useRef<number | null>(null);
   const reduced = useReducedMotion();
 
-  const goTo = (i: number) => setIndex((i + TOTAL) % TOTAL);
+  const goTo = (i: number) => setIndex((i + total) % total);
 
   useEffect(() => {
     const cards = cardRefs.current;
     cards.forEach((card, i) => {
       if (!card) return;
-      const offset = (i - index + TOTAL) % TOTAL;
-      const target = depthStyle(offset);
+      const offset = (i - index + total) % total;
+      const target = depthStyle(offset, total);
       if (!positioned.current || reduced) {
         gsap.set(card, target);
       } else {
@@ -91,7 +91,7 @@ function TestimonialStack() {
       }
     });
     positioned.current = true;
-  }, [index, reduced]);
+  }, [index, reduced, total]);
 
   const onTouchStart = (e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX;
@@ -111,7 +111,7 @@ function TestimonialStack() {
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
       >
-        {proof.testimonials.map((t, i) => {
+        {testimonials.map((t, i) => {
           const isFront = i === index;
           return (
             <div
@@ -142,7 +142,7 @@ function TestimonialStack() {
           ‹
         </button>
         <span className="text-micro text-fg-muted tabular-nums" aria-live="polite">
-          {String(index + 1).padStart(2, "0")} / {String(TOTAL).padStart(2, "0")}
+          {String(index + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}
         </span>
         <button
           type="button"
@@ -158,6 +158,7 @@ function TestimonialStack() {
 }
 
 export function Proof() {
+  const { proof } = useSiteContent();
   const rootRef = useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion();
 
@@ -186,7 +187,7 @@ export function Proof() {
           ))}
         </div>
         <div className="mt-16 flex justify-center" data-stack>
-          <TestimonialStack />
+          <TestimonialStack testimonials={proof.testimonials} />
         </div>
       </div>
     </section>

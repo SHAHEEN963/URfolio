@@ -20,6 +20,12 @@ npm-debug.log*
 .env*.local
 .env
 
+# dashboard: local-only content store and test uploads. Production (Vercel)
+# persists both through Vercel Blob instead — see src/lib/content/store.ts.
+/data/
+/public/uploads/*
+!/public/uploads/.gitkeep
+
 # editor
 .vscode/*
 !.vscode/extensions.json

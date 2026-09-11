@@ -2,7 +2,9 @@
 
 import { useEffect, type ReactNode } from "react";
 import { SiteStateProvider } from "@/lib/site-state";
+import { SiteContentProvider } from "@/lib/site-content";
 import { startSmoothScroll } from "@/lib/smooth-scroll";
+import type { SiteContent } from "@/content/site";
 
 /**
  * Boots Lenis for pointer devices with no reduced-motion preference only —
@@ -27,11 +29,13 @@ function SmoothScrollBoot() {
   return null;
 }
 
-export function Providers({ children }: { children: ReactNode }) {
+export function Providers({ content, children }: { content: SiteContent; children: ReactNode }) {
   return (
-    <SiteStateProvider>
-      <SmoothScrollBoot />
-      {children}
-    </SiteStateProvider>
+    <SiteContentProvider content={content}>
+      <SiteStateProvider>
+        <SmoothScrollBoot />
+        {children}
+      </SiteStateProvider>
+    </SiteContentProvider>
   );
 }

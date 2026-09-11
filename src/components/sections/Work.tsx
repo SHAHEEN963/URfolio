@@ -3,24 +3,32 @@
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { work, type WorkItem } from "@/content/site";
+import type { WorkItem } from "@/content/site";
 import { WorkVisual } from "@/components/ui/WorkVisual";
 import { Modal } from "@/components/ui/Modal";
 import { AutoPlaceholder } from "@/components/ui/Placeholder";
 import { useIsTouchDevice, useReducedMotion } from "@/lib/useReducedMotion";
+import { useSiteContent } from "@/lib/site-content";
 import { gsapEase, stagger } from "@/lib/motion";
+
+/** "01", "02", … — the row number always matches its place among the
+ *  currently *visible* items, so hiding/reordering from /dashboard can
+ *  never leave a stale or duplicate number on the page. */
+function numberFor(index: number) {
+  return String(index + 1).padStart(2, "0");
+}
 
 /** A small deterministic rotation per row, so the floating preview doesn't sit dead flat. */
 function rotationFor(seed: number) {
   return ((seed * 37) % 13) - 6; // -6..6 deg
 }
 
-function WorkModal({ item, onClose }: { item: WorkItem; onClose: () => void }) {
+function WorkModal({ item, number, onClose }: { item: WorkItem; number: string; onClose: () => void }) {
   return (
     <Modal open onClose={onClose} titleId="work-modal-title">
       <div className="flex items-start justify-between gap-4">
         <h3 id="work-modal-title" className="text-h3 text-fg">
-          {item.number} · {item.title}
+          {number} · {item.title}
         </h3>
         <button type="button" onClick={onClose} aria-label="Close" className="text-fg-muted hover:text-caramel text-xl leading-none">
           ✕
@@ -52,10 +60,12 @@ function WorkModal({ item, onClose }: { item: WorkItem; onClose: () => void }) {
 
 function Row({
   item,
+  number,
   onOpen,
   onMouseEnter,
 }: {
   item: WorkItem;
+  number: string;
   onOpen: () => void;
   onMouseEnter?: () => void;
 }) {
@@ -67,7 +77,7 @@ function Row({
         data-work-row
         className="group flex w-full items-center gap-4 py-5 text-left"
       >
-        <span className="text-small text-fg-muted w-8 shrink-0">{item.number}</span>
+        <span className="text-small text-fg-muted w-8 shrink-0">{number}</span>
         <span className="text-h3 flex-1 text-fg transition-colors group-hover:text-caramel">{item.title}</span>
         <span className="text-small text-fg-muted hidden sm:block w-24 shrink-0">{item.type}</span>
         <span className="text-small text-fg-muted w-16 shrink-0 text-right">
@@ -78,14 +88,14 @@ function Row({
   );
 }
 
-function Card({ item, onOpen }: { item: WorkItem; onOpen: () => void }) {
+function Card({ item, number, onOpen }: { item: WorkItem; number: string; onOpen: () => void }) {
   return (
     <button type="button" onClick={onOpen} className="text-left">
       <div className="aspect-[4/3] overflow-hidden rounded-[var(--radius-sm)]">
         <WorkVisual seed={item.seed} className="h-full w-full" />
       </div>
       <p className="text-h3 mt-3 text-fg">
-        {item.number} · {item.title}
+        {number} · {item.title}
       </p>
       <p className="text-small text-fg-muted mt-1">
         {item.type} · <AutoPlaceholder text={item.year} />
@@ -95,6 +105,8 @@ function Card({ item, onOpen }: { item: WorkItem; onOpen: () => void }) {
 }
 
 export function Work() {
+  const { work } = useSiteContent();
+  const items = work.items.filter((item) => !item.hidden);
   const [openItem, setOpenItem] = useState<WorkItem | null>(null);
   const [hoveredSeed, setHoveredSeed] = useState<number | null>(null);
   const isTouch = useIsTouchDevice();
@@ -165,16 +177,17 @@ export function Work() {
 
         {isTouch ? (
           <div ref={gridRef} className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            {work.items.map((item) => (
-              <Card key={item.id} item={item} onOpen={() => setOpenItem(item)} />
+            {items.map((item, i) => (
+              <Card key={item.id} item={item} number={numberFor(i)} onOpen={() => setOpenItem(item)} />
             ))}
           </div>
         ) : (
           <ul ref={listRef} onMouseLeave={() => setHoveredSeed(null)}>
-            {work.items.map((item) => (
+            {items.map((item, i) => (
               <Row
                 key={item.id}
                 item={item}
+                number={numberFor(i)}
                 onOpen={() => setOpenItem(item)}
                 onMouseEnter={() => setHoveredSeed(item.seed)}
               />
@@ -194,7 +207,13 @@ export function Work() {
         </div>
       )}
 
-      {openItem && <WorkModal item={openItem} onClose={() => setOpenItem(null)} />}
+      {openItem && (
+        <WorkModal
+          item={openItem}
+          number={numberFor(items.findIndex((i) => i.id === openItem.id))}
+          onClose={() => setOpenItem(null)}
+        />
+      )}
     </section>
   );
 }

@@ -3,10 +3,10 @@
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { SparkleOverlay } from "@/components/ui/SparkleOverlay";
-import { marquee } from "@/content/site";
+import { useSiteContent } from "@/lib/site-content";
 import { useReducedMotion } from "@/lib/useReducedMotion";
 
-function Row({ reverse }: { reverse: boolean }) {
+function Row({ reverse, words }: { reverse: boolean; words: string[] }) {
   const trackRef = useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion();
 
@@ -35,7 +35,7 @@ function Row({ reverse }: { reverse: boolean }) {
 
   const items = (key: string) => (
     <span className="flex shrink-0 items-center gap-8 pr-8" key={key}>
-      {marquee.words.map((word, i) => (
+      {words.map((word, i) => (
         <span key={i} className="flex items-center gap-8 text-h3 text-fg-muted">
           {word}
           <SparkleOverlay className="h-4 w-4 text-caramel" />
@@ -55,11 +55,12 @@ function Row({ reverse }: { reverse: boolean }) {
 }
 
 export function Marquee() {
+  const { marquee } = useSiteContent();
   return (
     <div className="border-y border-[var(--line)] py-8" aria-hidden="true">
-      <Row reverse={false} />
+      <Row reverse={false} words={marquee.words} />
       <div className="h-6" />
-      <Row reverse={true} />
+      <Row reverse={true} words={marquee.words} />
     </div>
   );
 }

@@ -3,10 +3,11 @@
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { pricing, isPh, type PricingPlan } from "@/content/site";
+import { isPh, type PricingPlan } from "@/content/site";
 import { Button } from "@/components/ui/Button";
 import { SparkleOverlay } from "@/components/ui/SparkleOverlay";
 import { AutoPlaceholder } from "@/components/ui/Placeholder";
+import { useSiteContent } from "@/lib/site-content";
 import { useSiteState } from "@/lib/site-state";
 import { gsapEase, stagger } from "@/lib/motion";
 import { useReducedMotion } from "@/lib/useReducedMotion";
@@ -69,6 +70,7 @@ function Card({ plan }: { plan: PricingPlan }) {
 }
 
 export function Pricing() {
+  const { pricing } = useSiteContent();
   const rootRef = useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion();
 

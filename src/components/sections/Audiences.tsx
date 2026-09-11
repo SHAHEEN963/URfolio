@@ -3,8 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { audiences, type AudiencePanel } from "@/content/site";
+import type { AudiencePanel } from "@/content/site";
 import { Button } from "@/components/ui/Button";
+import { useSiteContent } from "@/lib/site-content";
 import { useSiteState } from "@/lib/site-state";
 import { useIsTouchDevice, useReducedMotion } from "@/lib/useReducedMotion";
 import { gsapEase, stagger } from "@/lib/motion";
@@ -102,6 +103,7 @@ function Panel({
 }
 
 export function Audiences() {
+  const { audiences } = useSiteContent();
   const [hovered, setHovered] = useState<"individual" | "company" | null>(null);
   const isTouch = useIsTouchDevice();
   const reduced = useReducedMotion();

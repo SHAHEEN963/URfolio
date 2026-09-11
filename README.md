@@ -7,8 +7,9 @@ by a human designer. Built from `docs/brief.md` following the plan in
 
 ## Stack
 
-Next.js 16 (App Router, TypeScript, **static export**) · Tailwind CSS v4 ·
-GSAP (ScrollTrigger) · Lenis (smooth scroll) · web-vitals. No other UI or
+Next.js 16 (App Router, TypeScript, server-rendered) · Tailwind CSS v4 ·
+GSAP (ScrollTrigger) · Lenis (smooth scroll) · web-vitals · Vercel Blob
+(dashboard content/image persistence in production). No other UI or
 animation libraries.
 
 ## Running it
@@ -16,54 +17,105 @@ animation libraries.
 ```bash
 npm install
 npm run dev      # http://localhost:3000
-npm run build    # static export to /out
+npm run build && npm run start   # production server
 npm run lint
 npm run check-placeholders   # lists every placeholder still left in content/site.ts
 ```
 
-`npm run build` produces a fully static site in `/out` — upload that folder
-anywhere, or point Vercel/Cloudflare Pages/Netlify at this repo (framework
-preset: Next.js, static export). It needs no server or database.
+This site needs a Node server (not a static host) because of the `/dashboard`
+admin panel — deploy it to Vercel or any other Next.js-compatible host, not
+as a static export.
 
 ## Editing content
 
-Every string, number, price and link on the page lives in one file:
+There are two ways to edit everything on the site — text, headings, numbers,
+contact details, images, and every repeating list (work items, testimonials,
+pricing plans, FAQ, etc.):
 
-```
-src/content/site.ts
-```
+1. **`/dashboard`** — the recommended way for day-to-day edits. Log in, edit,
+   hit Save, and the change goes live immediately. See "Dashboard" below for
+   setup.
+2. **`src/content/site.ts`** directly — a code change, useful for restructuring
+   content or changing something the dashboard doesn't expose. This file also
+   defines the *default/fallback* values the site renders if nothing has been
+   saved from the dashboard yet (see `src/lib/content/store.ts`).
 
-Nothing else needs to change to edit copy, prices, FAQ answers, work samples,
-or contact details. Two other small files hold non-content configuration:
+Two other small files hold non-content configuration:
 
 ```
 src/lib/config.ts     Adobe Fonts kit ID, canonical domain, Formspree endpoint
 public/brand/          logo.svg and color.svg — the source brand files, untouched
 ```
 
+## Dashboard
+
+A password-protected admin panel at `/dashboard` for editing every piece of
+visible content without touching code — text, images, the logo, work items
+(add/edit/delete/duplicate/reorder/hide), and every other repeating list.
+
+**One-time setup:**
+
+1. Generate a session-signing secret (any random 32+ character string) and a
+   password hash:
+
+   ```bash
+   npm run set-password
+   ```
+
+   This prompts for a password (12+ characters) and prints an `ADMIN_EMAIL`
+   line (edit the address) and an `ADMIN_PASSWORD_HASH` line. The plaintext
+   password is never written anywhere — only the one-way hash it prints
+   belongs in your environment.
+
+2. Add to `.env.local` (local dev) and your hosting provider's environment
+   variables (production):
+
+   ```
+   SESSION_SECRET=<32+ random characters>
+   ADMIN_EMAIL=you@example.com
+   ADMIN_PASSWORD_HASH=scrypt\$...\$...
+   ```
+
+   **Escape every `$` in the hash as `\$`** — otherwise Next's env loader
+   tries to expand `$<hex>` as a variable reference and silently corrupts the
+   value, which shows up as "Incorrect email or password" even with the right
+   password.
+
+3. Restart the dev server (or redeploy). Sign in at `/dashboard` with that
+   email and password. The session cookie lasts 400 days or until you log
+   out — there's no separate "remember me" toggle.
+
+**Where content and uploads are stored:**
+
+- **Local dev**: `data/content.json` and `public/uploads/` (both gitignored —
+  don't commit them). Deleting `data/content.json` resets the site back to
+  `src/content/site.ts`'s defaults.
+- **Production (Vercel)**: a [Vercel Blob](https://vercel.com/docs/storage/vercel-blob)
+  store, since a deployed serverless filesystem can't be written to. Add a
+  Blob store to your Vercel project and set `BLOB_READ_WRITE_TOKEN` (Vercel
+  does this automatically if you attach the store through its dashboard).
+  Without it, `/dashboard` still loads and lets you look around, but shows a
+  banner explaining that saves and image uploads won't persist.
+
+Changing `ADMIN_EMAIL` or `ADMIN_PASSWORD_HASH` immediately invalidates any
+existing session, even ones with an unexpired cookie.
+
 ## ⚠️ Before launch — placeholders to fill in
 
-The brief asked for a strong first draft with real numbers, clients and
-testimonials left as visible placeholders rather than invented — run this any
-time to get the full list:
+`content/site.ts`'s own numbers, prices and testimonials have since been
+replaced with realistic sample data (edit them via `/dashboard` or the file
+directly) — running `npm run check-placeholders` should report none left:
 
 ```bash
 npm run check-placeholders
 ```
 
-At the time of writing, that's **45 bracketed values** in `content/site.ts` —
-sites-launched / countries / avg. days / rating counters, all three
-`AED [ ]` prices, revision-round and project-count numbers, the six sample
-work items' years and one-line results, all four testimonials, the three
-budget-range chip labels, and the "reply within [X] hours" / "launch in [X]
-days" copy. Each renders with a dashed outline on the live site so an unfilled
-one is never mistaken for a real figure.
-
 Contact details: email (`shaheen@urfolio.net`) and WhatsApp
-(`+963 988 824 456`) are set and live. **Social links**
+(`+963 988 824 456`) are set and live — editable from `/dashboard`'s
+"Header & Footer" tab. **Social links**
 (`contact.socials[].href` — Instagram/LinkedIn/Behance) are still empty on
-purpose and render as disabled/dashed links until filled in (see
-`src/lib/contact-links.ts`).
+purpose and render as disabled/dashed links until filled in, also from that
+same tab (see `src/lib/contact-links.ts`).
 
 Two more things aren't bracketed but are still placeholders:
 
@@ -105,22 +157,32 @@ hides instead of showing a dashed placeholder.
 
 ```
 src/
-  app/            layout.tsx · page.tsx · globals.css
-                  icon.tsx · apple-icon.tsx · opengraph-image.tsx  (generated from the mark)
-                  sitemap.ts · robots.ts
+  app/
+    (site)/       layout.tsx · page.tsx        ← the public marketing site
+    (dashboard)/  layout.tsx
+      dashboard/  page.tsx · login/ · _components/  ← Editor.tsx, fields.tsx
+    globals.css · icon.tsx · apple-icon.tsx · opengraph-image.tsx
+    sitemap.ts · robots.ts
+  proxy.ts        redirects signed-out /dashboard/* requests to /dashboard/login
   components/
     sections/     Preloader · Nav · Hero · Marquee · Statement · Audiences
                   Process · Work · BeforeAfter · Proof · Pricing · Faq
                   Contact · Footer
-    ui/           Mark · SparkleOverlay · Button · TogglePill · Chip · Modal
-                  BrowserFrame · WorkVisual · Placeholder
+    ui/           Logo · Mark · SparkleOverlay · Button · TogglePill · Chip
+                  Modal · BrowserFrame · WorkVisual · Placeholder
   content/        site.ts          ← every string, number, price and link
-  lib/            motion.ts · config.ts · site-state.ts · smooth-scroll.ts
-                  submit-brief.ts · contact-links.ts · ready-event.ts
-                  useReducedMotion.ts · mark-path.ts · palette-bars.ts
+                                      (defaults/fallback + the dashboard's shape)
+  lib/
+    auth/         password.ts · session.ts · credentials.ts · admin.ts · actions.ts
+    content/      store.ts (read/write, local file or Vercel Blob) · actions.ts
+    site-content.tsx   React context feeding dashboard-edited content to every
+                        section component via useSiteContent()
+    motion.ts · config.ts · site-state.ts · smooth-scroll.ts · submit-brief.ts
+    contact-links.ts · ready-event.ts · useReducedMotion.ts · mark-path.ts
+    palette-bars.ts
 public/brand/     logo.svg · color.svg
 docs/             brief.md · phase-0-plan.md
-scripts/          check-placeholders.mjs
+scripts/          check-placeholders.mjs · set-password.mjs
 ```
 
 ## Notable implementation details
@@ -129,7 +191,8 @@ scripts/          check-placeholders.mjs
   `SparkleOverlay.tsx`) are drawn from the exact path data in
   `public/brand/logo.svg`, extracted programmatically rather than retyped, so
   there's no risk of a transcription error in that path. `logo.svg` itself is
-  never edited — see `lib/mark-path.ts`.
+  never edited — see `lib/mark-path.ts`. `components/ui/Logo.tsx` renders that
+  mark by default, or a dashboard-uploaded image once one is set.
 - **Placeholders** render visibly (dashed outline, a tooltip explaining why)
   via `components/ui/Placeholder.tsx`, rather than ever inventing a number.
 - **Individual/Company** is asked once — the hero toggle, the audience
@@ -154,16 +217,15 @@ In `npm run dev` you'll see one React hydration warning in the console for
 "avoid a flash of the wrong state" pattern used by most dark-mode toggles
 (`suppressHydrationWarning` is set on that tag) — a synchronous script in
 `<head>` intentionally stamps that attribute before React hydrates, so a
-repeat visit never even paints the preloader. It does not appear in the
-production build (verified against the static `/out` export) and has no
-effect on what a visitor sees.
+repeat visit never even paints the preloader. It has no effect on what a
+visitor sees.
 
 ## What I could not verify in this environment
 
 I don't have a Lighthouse/DevTools audit tool available here, so the
 brief's ≥90 score targets (Performance/Accessibility/Best Practices/SEO,
 LCP < 2.5s, CLS < 0.1) are unverified — please run Lighthouse once this is
-deployed. Everything within reach here checks out: `next build` produces a
-clean static export, `tsc --noEmit` and `eslint` are both clean, and the
-production build's console is free of errors (checked by serving `/out`
-directly and inspecting the console).
+deployed. Everything within reach here checks out: `next build`, `tsc
+--noEmit` and `eslint` are all clean, and the full dashboard flow (login,
+edit, save, confirm the change on the public site, log out invalidates the
+session) was checked end-to-end against a production build.

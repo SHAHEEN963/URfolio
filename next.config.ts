@@ -1,11 +1,13 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  output: "export",
+  // Was `output: "export"` — a pure static export can't run what /dashboard
+  // needs (a server to check a password against, hold a signed session
+  // cookie, or persist a content save). Deploy this to a Node-capable host
+  // (Vercel, etc.) from here on, not plain static file hosting.
   images: {
-    // Static export can't use the default loader (it needs a running server).
-    // There is no remote image source yet — every image is a local placeholder
-    // SVG — so unoptimized output is the correct choice, not a workaround.
+    // No remote image source; uploaded content images are user photos of
+    // unknown/unbounded dimensions the built-in optimizer isn't meant for.
     unoptimized: true,
   },
 };

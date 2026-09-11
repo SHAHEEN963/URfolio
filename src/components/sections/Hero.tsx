@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
-import { hero } from "@/content/site";
+import { useSiteContent } from "@/lib/site-content";
 import { AutoPlaceholder } from "@/components/ui/Placeholder";
 import { Button } from "@/components/ui/Button";
 import { TogglePill } from "@/components/ui/TogglePill";
@@ -30,6 +30,7 @@ function nameToDomain(name: string): string {
 
 /** The hero's live build preview — a scripted demo, no real AI call (brief §2). */
 function LivePreview({ visitorName }: { visitorName: string }) {
+  const { hero } = useSiteContent();
   const { audience } = useSiteState();
   const sample = hero.preview[audience];
   const [step, setStep] = useState<Step>("wireframe");
@@ -129,6 +130,7 @@ function HeadlineLine({ line }: { line: string }) {
 }
 
 export function Hero() {
+  const { hero } = useSiteContent();
   const { audience, setAudience } = useSiteState();
   const [visitorName, setVisitorName] = useState("");
   const headlineRef = useRef<HTMLHeadingElement>(null);

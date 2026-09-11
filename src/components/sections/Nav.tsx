@@ -2,9 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
-import { Mark } from "@/components/ui/Mark";
+import { Logo } from "@/components/ui/Logo";
 import { Button } from "@/components/ui/Button";
-import { nav } from "@/content/site";
+import { useSiteContent } from "@/lib/site-content";
 import { scrollToHash } from "@/lib/smooth-scroll";
 import { gsapEase, stagger } from "@/lib/motion";
 import { useReducedMotion } from "@/lib/useReducedMotion";
@@ -16,6 +16,7 @@ import { PALETTE_BARS, BAR_BG_CLASS } from "@/lib/palette-bars";
  * five-bar wipe used by the preloader (brief §1).
  */
 export function Nav() {
+  const { nav } = useSiteContent();
   const [hidden, setHidden] = useState(false);
   const [active, setActive] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -53,7 +54,7 @@ export function Nav() {
     );
     els.forEach((el) => observer.observe(el));
     return () => observer.disconnect();
-  }, []);
+  }, [nav.links]);
 
   // Mobile menu: five-bar wipe down, links stagger in.
   useEffect(() => {
@@ -102,7 +103,7 @@ export function Nav() {
             e.preventDefault();
             go("#top");
           }}>
-            <Mark className="h-9 w-9 shrink-0" />
+            <Logo className="h-9 w-9 shrink-0" />
             <span className="text-lg font-semibold">URfolio</span>
           </a>
 
@@ -165,7 +166,7 @@ export function Nav() {
         <div className="relative z-10 flex h-full flex-col">
           <div className="container flex h-[72px] items-center justify-between">
             <span className="flex items-center gap-2.5 text-espresso">
-              <Mark className="h-9 w-9 shrink-0" />
+              <Logo className="h-9 w-9 shrink-0" />
               <span className="text-lg font-semibold">URfolio</span>
             </span>
             <button

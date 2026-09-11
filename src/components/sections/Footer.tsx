@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { footer, contact } from "@/content/site";
+import { useSiteContent } from "@/lib/site-content";
 import { whatsappHref, mailHref } from "@/lib/contact-links";
 import { scrollToHash } from "@/lib/smooth-scroll";
 import { gsapEase, stagger } from "@/lib/motion";
@@ -28,6 +28,7 @@ function ContactLink({ href, children }: { href: string | null; children: React.
 }
 
 export function Footer() {
+  const { footer, contact } = useSiteContent();
   const wordmarkRef = useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion();
 
