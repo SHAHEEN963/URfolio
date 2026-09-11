@@ -49,44 +49,63 @@ function WithMock() {
   );
 }
 
+const GLASS_CHIP =
+  "block whitespace-nowrap rounded-full border border-[var(--line)] bg-[var(--bg)]/70 px-5 py-2 text-small font-medium text-fg backdrop-blur-md";
+
 export function BeforeAfter() {
   const [mode, setMode] = useState<Mode>("without");
   const withRef = useRef<HTMLDivElement>(null);
   const rootRef = useRef<HTMLDivElement>(null);
+  const captionGroupRef = useRef<HTMLDivElement>(null);
+  const captionWithoutRef = useRef<HTMLSpanElement>(null);
+  const captionWithRef = useRef<HTMLSpanElement>(null);
   const reduced = useReducedMotion();
 
-  // Entrance: captions reveal in masks as the section comes into view.
+  // Entrance: the glass caption chip reveals in a mask as the section
+  // scrolls into view (this section's one entrance behaviour).
   useEffect(() => {
     const root = rootRef.current;
-    if (!root || reduced) return;
+    const chip = captionGroupRef.current;
+    if (!root || !chip || reduced) return;
     gsap.registerPlugin(ScrollTrigger);
-    const heading = root.querySelector("[data-reveal]");
-    if (!heading) return;
     const ctx = gsap.context(() => {
       gsap.fromTo(
-        heading,
-        { yPercent: 100 },
-        { yPercent: 0, duration: 0.7, ease: gsapEase.enter, scrollTrigger: { trigger: root, start: "top 80%" } }
+        chip,
+        { yPercent: 130, opacity: 0 },
+        {
+          yPercent: 0,
+          opacity: 1,
+          duration: 0.7,
+          ease: gsapEase.enter,
+          scrollTrigger: { trigger: root, start: "top 80%" },
+        }
       );
     }, root);
     return () => ctx.revert();
   }, [reduced]);
 
-  // Toggle morph: clip-path circle reveal from the switch, blended with a
-  // touch of opacity so the edge doesn't feel like a hard cut. Short
-  // (~400ms) and a gentle ease — the original 1.2s expo.inOut wipe read as
-  // slow/jumpy for a simple two-state toggle, not a full-screen reveal.
+  // Toggle morph: the card's clip-path circle reveal and the caption
+  // crossfade animate together, on the same short, gentle transition — a
+  // deliberately smaller/gentler curve than the old 1.2s expo.inOut wipe,
+  // which read as slow and jumpy for a simple two-state toggle.
   useEffect(() => {
     const el = withRef.current;
-    if (!el) return;
-    const clipPath = mode === "with" ? "circle(150% at 50% 0%)" : "circle(0% at 50% 0%)";
-    const opacity = mode === "with" ? 1 : 0;
+    const without = captionWithoutRef.current;
+    const withEl = captionWithRef.current;
+    if (!el || !without || !withEl) return;
+    const isWith = mode === "with";
+    const clipPath = isWith ? "circle(150% at 50% 0%)" : "circle(0% at 50% 0%)";
+    const cardOpacity = isWith ? 1 : 0;
     if (reduced) {
       el.style.clipPath = clipPath;
-      el.style.opacity = String(opacity);
+      el.style.opacity = String(cardOpacity);
+      without.style.opacity = isWith ? "0" : "1";
+      withEl.style.opacity = isWith ? "1" : "0";
       return;
     }
-    gsap.to(el, { clipPath, opacity, duration: 0.4, ease: gsapEase.ui });
+    gsap.to(el, { clipPath, opacity: cardOpacity, duration: 0.4, ease: gsapEase.ui });
+    gsap.to(without, { opacity: isWith ? 0 : 1, duration: 0.35, ease: gsapEase.ui });
+    gsap.to(withEl, { opacity: isWith ? 1 : 0, duration: 0.35, ease: gsapEase.ui });
   }, [mode, reduced]);
 
   return (
@@ -133,11 +152,26 @@ export function BeforeAfter() {
             <WithMock />
           </div>
 
-          <p className="mt-6 overflow-hidden text-center">
-            <span data-reveal className="text-h3 inline-block text-fg" aria-live="polite">
-              {mode === "with" ? beforeAfter.caption.with : beforeAfter.caption.without}
-            </span>
-          </p>
+          {/* Glass caption — lives inside the card now and crossfades with
+              the toggle, instead of a separate line of text underneath. */}
+          <div
+            ref={captionGroupRef}
+            className="pointer-events-none absolute inset-x-0 bottom-4 flex justify-center px-4 sm:bottom-6"
+            aria-live="polite"
+          >
+            <div className="relative">
+              <span ref={captionWithoutRef} className={GLASS_CHIP} aria-hidden={mode !== "without"}>
+                {beforeAfter.caption.without}
+              </span>
+              <span
+                ref={captionWithRef}
+                className={`${GLASS_CHIP} absolute inset-0 flex items-center justify-center opacity-0`}
+                aria-hidden={mode !== "with"}
+              >
+                {beforeAfter.caption.with}
+              </span>
+            </div>
+          </div>
         </div>
       </div>
     </section>

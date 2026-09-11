@@ -90,7 +90,12 @@ export function Preloader() {
     <div
       ref={rootRef}
       id="urfolio-preloader"
-      className="fixed inset-0 z-[999] flex cursor-pointer flex-col"
+      // bg-espresso matters here: each bar starts scaled to zero width
+      // (`transform: scaleX(0)`), which only affects paint, not layout — so
+      // without its own opaque backdrop, this root was letting the actual
+      // page (hero text, nav) show through the gaps for the first ~350ms,
+      // right as the bars were still stacking in.
+      className="fixed inset-0 z-[999] flex cursor-pointer flex-col bg-espresso"
       role="presentation"
       aria-hidden="true"
     >
