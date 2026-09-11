@@ -6,7 +6,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { beforeAfter } from "@/content/site";
 import { WorkVisual } from "@/components/ui/WorkVisual";
 import { BrowserFrame } from "@/components/ui/BrowserFrame";
-import { gsapEase, duration } from "@/lib/motion";
+import { gsapEase } from "@/lib/motion";
 import { useReducedMotion } from "@/lib/useReducedMotion";
 
 type Mode = "without" | "with";
@@ -72,26 +72,31 @@ export function BeforeAfter() {
     return () => ctx.revert();
   }, [reduced]);
 
-  // Toggle morph: clip-path circle reveal from the switch, not a fade.
+  // Toggle morph: clip-path circle reveal from the switch, blended with a
+  // touch of opacity so the edge doesn't feel like a hard cut. Short
+  // (~400ms) and a gentle ease — the original 1.2s expo.inOut wipe read as
+  // slow/jumpy for a simple two-state toggle, not a full-screen reveal.
   useEffect(() => {
     const el = withRef.current;
     if (!el) return;
+    const clipPath = mode === "with" ? "circle(150% at 50% 0%)" : "circle(0% at 50% 0%)";
+    const opacity = mode === "with" ? 1 : 0;
     if (reduced) {
-      el.style.clipPath = mode === "with" ? "circle(150% at 50% 0%)" : "circle(0% at 50% 0%)";
+      el.style.clipPath = clipPath;
+      el.style.opacity = String(opacity);
       return;
     }
-    gsap.to(el, {
-      clipPath: mode === "with" ? "circle(150% at 50% 0%)" : "circle(0% at 50% 0%)",
-      duration: duration.signature,
-      ease: gsapEase.wipe,
-    });
+    gsap.to(el, { clipPath, opacity, duration: 0.4, ease: gsapEase.ui });
   }, [mode, reduced]);
 
   return (
     <section
       id="before-after"
       data-surface="paper"
-      className="section bg-[var(--bg)] text-[var(--fg)]"
+      // A fixed, smaller padding instead of `.section`'s clamp(5rem…11rem):
+      // this is a compact toggle + card, not a long-form section, so that
+      // much top/bottom space read as excessive empty space around it.
+      className="bg-[var(--bg)] py-16 text-[var(--fg)] sm:py-20"
       aria-label="Before and after URfolio"
     >
       <div className="container">
@@ -120,15 +125,15 @@ export function BeforeAfter() {
           </div>
         </div>
 
-        <div ref={rootRef} className="relative mx-auto mt-12 max-w-2xl">
-          <div className="relative aspect-[4/3] overflow-hidden rounded-[var(--radius-md)] bg-[var(--bg-raised)] p-8 grayscale">
+        <div ref={rootRef} className="relative mx-auto mt-8 max-w-2xl">
+          <div className="relative aspect-[4/3] overflow-hidden rounded-[var(--radius-md)] bg-[var(--bg-raised)] p-6 grayscale sm:p-8">
             <WithoutMock />
           </div>
-          <div ref={withRef} className="absolute inset-0 p-8" style={{ clipPath: "circle(0% at 50% 0%)" }}>
+          <div ref={withRef} className="absolute inset-0 p-6 sm:p-8" style={{ clipPath: "circle(0% at 50% 0%)" }}>
             <WithMock />
           </div>
 
-          <p className="mt-8 overflow-hidden text-center">
+          <p className="mt-6 overflow-hidden text-center">
             <span data-reveal className="text-h3 inline-block text-fg" aria-live="polite">
               {mode === "with" ? beforeAfter.caption.with : beforeAfter.caption.without}
             </span>

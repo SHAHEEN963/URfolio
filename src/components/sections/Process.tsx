@@ -85,7 +85,16 @@ export function Process() {
 
   return (
     <section id="process" ref={sectionRef} aria-label="How it works">
-      <div ref={pinRef} className="section min-h-screen flex items-center">
+      {/*
+        Not the shared `.section` class here on purpose: its padding-block
+        (clamp(5rem, …, 11rem) — up to 176px) is meant for a normal scrolling
+        section, but this one is pinned to a fixed-height viewport box, so
+        that much padding both pushed the heading far down on entry and made
+        the top/bottom gap uneven against the content's actual height. A
+        small, fixed, equal padding keeps the pin visually balanced at any
+        screen height.
+      */}
+      <div ref={pinRef} className="min-h-screen flex items-center py-12 sm:py-16">
         <div className="container grid gap-16 lg:grid-cols-2 lg:items-center">
           <div>
             <h2 className="text-h2 text-fg mb-10">{processContent.heading}</h2>

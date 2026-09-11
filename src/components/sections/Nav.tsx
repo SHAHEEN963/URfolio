@@ -102,8 +102,8 @@ export function Nav() {
             e.preventDefault();
             go("#top");
           }}>
-            <Mark className="h-6 w-6" />
-            <span className="text-base font-semibold">URfolio</span>
+            <Mark className="h-9 w-9 shrink-0" />
+            <span className="text-lg font-semibold">URfolio</span>
           </a>
 
           <nav className="hidden md:flex items-center gap-8" aria-label="Primary">
@@ -165,8 +165,8 @@ export function Nav() {
         <div className="relative z-10 flex h-full flex-col">
           <div className="container flex h-[72px] items-center justify-between">
             <span className="flex items-center gap-2.5 text-espresso">
-              <Mark className="h-6 w-6" />
-              <span className="text-base font-semibold">URfolio</span>
+              <Mark className="h-9 w-9 shrink-0" />
+              <span className="text-lg font-semibold">URfolio</span>
             </span>
             <button
               className="text-espresso p-2 -mr-2"

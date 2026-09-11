@@ -17,6 +17,17 @@ const STEPS = ["wireframe", "identity", "assembled", "published"] as const;
 type Step = (typeof STEPS)[number];
 const STEP_DELAYS_MS = [0, 900, 2000, 3300]; // when each step becomes active
 
+/** "Mohammad Shaheen" -> "mohammad-shaheen.com" — live as the visitor types. */
+function nameToDomain(name: string): string {
+  const slug = name
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, "") // strip anything that isn't a domain-safe character
+    .replace(/[\s-]+/g, "-") // collapse spaces/repeated hyphens into one
+    .replace(/^-+|-+$/g, ""); // trim leading/trailing hyphens
+  return slug ? `${slug}.com` : "";
+}
+
 /** The hero's live build preview — a scripted demo, no real AI call (brief §2). */
 function LivePreview({ visitorName }: { visitorName: string }) {
   const { audience } = useSiteState();
@@ -24,6 +35,10 @@ function LivePreview({ visitorName }: { visitorName: string }) {
   const [step, setStep] = useState<Step>("wireframe");
   const reduced = useReducedMotion();
   const displayName = visitorName.trim() || sample.name;
+  // Both the name and the domain shown in the preview come from the same
+  // input, live — falling back to the sample domain once the typed name
+  // strips down to nothing (e.g. only symbols/emoji were entered).
+  const displayDomain = nameToDomain(visitorName) || sample.domain;
 
   useEffect(() => {
     // Reduced motion skips the scripted sequence entirely — handled as a
@@ -41,7 +56,7 @@ function LivePreview({ visitorName }: { visitorName: string }) {
   const stepIndex = STEPS.indexOf(displayStep);
 
   return (
-    <BrowserFrame url={sample.domain}>
+    <BrowserFrame url={displayDomain}>
       <div className="space-y-4">
         <div className="space-y-1">
           {stepIndex >= 1 ? (
@@ -183,7 +198,13 @@ export function Hero() {
     <section
       ref={sectionRef}
       id="top"
-      className="section relative overflow-hidden pt-[calc(72px+2rem)]"
+      className="section relative overflow-hidden"
+      // `.section`'s own padding-block (globals.css) is unlayered CSS, so it
+      // always wins over a Tailwind pt-* utility here regardless of source
+      // order — an inline style is the one thing guaranteed to override it,
+      // giving the hero a small, fixed gap below the fixed nav instead of
+      // the section rhythm's much larger clamp() top padding.
+      style={{ paddingTop: "calc(72px + 2rem)" }}
       aria-label="Introduction"
     >
       {!isTouch && !reduced && (

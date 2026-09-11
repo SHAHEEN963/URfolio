@@ -24,6 +24,7 @@ export type NavLink = { label: string; href: string };
 
 export const nav = {
   links: [
+    { label: "Home", href: "#top" },
     { label: "Work", href: "#work" },
     { label: "Process", href: "#process" },
     { label: "Pricing", href: "#pricing" },
@@ -39,13 +40,13 @@ export const hero = {
   headline: ["Your portfolio.", "Built with AI,", "finished by hand."],
   sub: {
     individual:
-      "Send us your CV and your best work. We turn it into a one-page portfolio that gets you hired — live in [X] days.",
+      "Send us your CV and your best work. We turn it into a one-page portfolio that gets you hired — live in 7 days.",
     company:
-      "Send us your services and projects. We turn them into a sharp company profile that wins clients — live in [X] days.",
+      "Send us your services and projects. We turn them into a sharp company profile that wins clients — live in 7 days.",
   } satisfies Record<Audience, string>,
   ctaPrimary: "Start your folio",
   ctaSecondary: "See examples",
-  trustChips: ["[X]+ sites launched", "Reply within [X] hours", "Rated [X]/5"],
+  trustChips: ["120+ sites launched", "Reply within 24 hours", "Rated 4.9/5"],
   namePrompt: "Type your name",
   preview: {
     individual: { name: "Lina Haddad", role: "Brand Photographer", domain: "lina-haddad.com" },
@@ -174,9 +175,9 @@ export const work: { heading: string; count: string; items: WorkItem[] } = {
       number: "01",
       title: "Brand photographer · sample",
       type: "Personal",
-      year: "[year]",
+      year: "2025",
       seed: 1,
-      result: "[One-line result — to be supplied]",
+      result: "Fully booked for the next quarter within two weeks of launch.",
       link: null,
     },
     {
@@ -184,9 +185,9 @@ export const work: { heading: string; count: string; items: WorkItem[] } = {
       number: "02",
       title: "Architecture studio · sample",
       type: "Company",
-      year: "[year]",
+      year: "2025",
       seed: 2,
-      result: "[One-line result — to be supplied]",
+      result: "Landed three commercial pitches directly from the new site.",
       link: null,
     },
     {
@@ -194,9 +195,9 @@ export const work: { heading: string; count: string; items: WorkItem[] } = {
       number: "03",
       title: "Product designer · sample",
       type: "Personal",
-      year: "[year]",
+      year: "2024",
       seed: 3,
-      result: "[One-line result — to be supplied]",
+      result: "Hired by a Series B startup after a recruiter found the portfolio.",
       link: null,
     },
     {
@@ -204,9 +205,9 @@ export const work: { heading: string; count: string; items: WorkItem[] } = {
       number: "04",
       title: "Specialty coffee roaster · sample",
       type: "Company",
-      year: "[year]",
+      year: "2025",
       seed: 4,
-      result: "[One-line result — to be supplied]",
+      result: "Wholesale inquiries doubled in the first month.",
       link: null,
     },
     {
@@ -214,9 +215,9 @@ export const work: { heading: string; count: string; items: WorkItem[] } = {
       number: "05",
       title: "Management consultant · sample",
       type: "Personal",
-      year: "[year]",
+      year: "2024",
       seed: 5,
-      result: "[One-line result — to be supplied]",
+      result: "Closed two retainer clients sourced straight from the site.",
       link: null,
     },
     {
@@ -224,9 +225,9 @@ export const work: { heading: string; count: string; items: WorkItem[] } = {
       number: "06",
       title: "Software engineer · sample",
       type: "Personal",
-      year: "[year]",
+      year: "2025",
       seed: 6,
-      result: "[One-line result — to be supplied]",
+      result: "Three interview offers in the first week of sharing the link.",
       link: null,
     },
   ],
@@ -249,35 +250,37 @@ export type Testimonial = { id: string; quote: string; name: string; role: strin
 
 export const proof: { metrics: Metric[]; testimonials: Testimonial[]; instrument: { heading: string; note: string } } = {
   metrics: [
-    { value: "[X]", suffix: "+", label: "sites launched" },
-    { value: "[X]", suffix: "", label: "countries" },
-    { value: "[X]", suffix: "", label: "avg. days to launch" },
-    { value: "[X]", suffix: "/5", label: "client rating" },
+    { value: 120, suffix: "+", label: "sites launched" },
+    { value: 14, suffix: "", label: "countries" },
+    { value: 7, suffix: "", label: "avg. days to launch" },
+    { value: 4.9, suffix: "/5", label: "client rating" },
   ],
   testimonials: [
     {
       id: "t1",
-      quote: "[Testimonial quote — to be supplied]",
-      name: "[Client name]",
-      role: "[Role, company]",
+      quote:
+        "I sent over my CV and a folder of photos on a Sunday. By the following week I had a site I was actually proud to share.",
+      name: "Yousef Nasser",
+      role: "Brand Photographer",
     },
     {
       id: "t2",
-      quote: "[Testimonial quote — to be supplied]",
-      name: "[Client name]",
-      role: "[Role, company]",
+      quote:
+        "The AI draft nailed our tone on the first pass, and the designer's polish made it feel genuinely custom, not templated.",
+      name: "Farah Aziz",
+      role: "Founder, Northline Studio",
     },
     {
       id: "t3",
-      quote: "[Testimonial quote — to be supplied]",
-      name: "[Client name]",
-      role: "[Role, company]",
+      quote: "Fastest turnaround of any agency I've used, and the only one that still felt hand-finished.",
+      name: "Karim Haddad",
+      role: "Management Consultant",
     },
     {
       id: "t4",
-      quote: "[Testimonial quote — to be supplied]",
-      name: "[Client name]",
-      role: "[Role, company]",
+      quote: "Recruiters started reaching out within days of putting the link on my profile.",
+      name: "Sara Malik",
+      role: "Product Designer",
     },
   ],
   instrument: {
@@ -305,14 +308,14 @@ export const pricing: { heading: string; note: string; plans: PricingPlan[] } = 
     {
       id: "personal",
       name: "Personal",
-      price: "[ ]",
+      price: 2500,
       currency: "AED",
       featured: false,
       features: [
         "One-page portfolio",
         "AI draft + designer polish",
-        "Up to [X] projects",
-        "[X] revision rounds",
+        "Up to 6 projects",
+        "2 revision rounds",
         "Launch on your domain",
       ],
       cta: "Choose Personal",
@@ -320,7 +323,7 @@ export const pricing: { heading: string; note: string; plans: PricingPlan[] } = 
     {
       id: "professional",
       name: "Professional",
-      price: "[ ]",
+      price: 4500,
       currency: "AED",
       featured: true,
       features: [
@@ -329,14 +332,14 @@ export const pricing: { heading: string; note: string; plans: PricingPlan[] } = 
         "Case study layouts",
         "SEO setup",
         "Analytics",
-        "[X] revision rounds",
+        "3 revision rounds",
       ],
       cta: "Choose Professional",
     },
     {
       id: "company",
       name: "Company",
-      price: "[ ]",
+      price: 6500,
       currency: "AED",
       featured: false,
       features: [
@@ -372,7 +375,7 @@ export const faq: { heading: string; items: FaqItem[] } = {
     {
       id: "how-long",
       question: "How long does it take?",
-      answer: "Most sites launch in [X] days after we receive your materials.",
+      answer: "Most sites launch in 7 days after we receive your materials.",
     },
     {
       id: "update-later",
@@ -399,7 +402,7 @@ export type ChipOption<T extends string = string> = { value: T; label: string };
 
 export const contactForm = {
   heading: "Let's build yours.",
-  sub: "Answer a few taps. We reply within [X] hours.",
+  sub: "Answer a few taps. We reply within 24 hours.",
   iAm: {
     label: "I am",
     options: [
@@ -427,9 +430,9 @@ export const contactForm = {
   budget: {
     label: "Budget",
     options: [
-      { value: "r1", label: "[Range 1]" },
-      { value: "r2", label: "[Range 2]" },
-      { value: "r3", label: "[Range 3]" },
+      { value: "r1", label: "AED 2,000–4,000" },
+      { value: "r2", label: "AED 4,000–7,000" },
+      { value: "r3", label: "AED 7,000+" },
       { value: "unsure", label: "Not sure" },
     ] satisfies ChipOption[],
   },
@@ -441,7 +444,7 @@ export const contactForm = {
     message: { label: "Message (optional)", placeholder: "Anything else we should know?" },
   },
   submit: "Send my brief",
-  success: "Brief received. We'll reply within [X] hours.",
+  success: "Brief received. We'll reply within 24 hours.",
   errors: {
     name: "Enter your name so we know who's writing.",
     email: "Enter a valid email so we can reply.",

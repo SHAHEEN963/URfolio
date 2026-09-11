@@ -53,73 +53,6 @@ function Counter({ value, suffix, label }: { value: number | string; suffix: str
   );
 }
 
-// ─── Testimonial slider ────────────────────────────────────────────────
-
-function TestimonialSlider() {
-  const trackRef = useRef<HTMLDivElement>(null);
-  const [index, setIndex] = useState(0);
-  const total = proof.testimonials.length;
-
-  const goTo = (i: number) => {
-    const track = trackRef.current;
-    if (!track) return;
-    const clamped = (i + total) % total;
-    track.children[clamped]?.scrollIntoView({ behavior: "smooth", inline: "start", block: "nearest" });
-  };
-
-  useEffect(() => {
-    const track = trackRef.current;
-    if (!track) return;
-    const onScroll = () => {
-      const i = Math.round(track.scrollLeft / track.clientWidth);
-      setIndex(Math.min(total - 1, Math.max(0, i)));
-    };
-    track.addEventListener("scroll", onScroll, { passive: true });
-    return () => track.removeEventListener("scroll", onScroll);
-  }, [total]);
-
-  return (
-    <div>
-      <div
-        ref={trackRef}
-        className="flex snap-x snap-mandatory overflow-x-auto scroll-smooth [scrollbar-width:none]"
-        role="region"
-        aria-label="Client testimonials"
-      >
-        {proof.testimonials.map((t) => (
-          <div key={t.id} className="w-full shrink-0 snap-start pr-6">
-            <p className="text-lead measure text-fg">“{t.quote}”</p>
-            <p className="text-small text-fg-muted mt-4">
-              {t.name} — {t.role}
-            </p>
-          </div>
-        ))}
-      </div>
-      <div className="mt-6 flex items-center gap-4">
-        <button
-          type="button"
-          onClick={() => goTo(index - 1)}
-          aria-label="Previous testimonial"
-          className="text-fg-muted hover:text-caramel"
-        >
-          ‹
-        </button>
-        <span className="text-micro text-fg-muted tabular-nums">
-          {String(index + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}
-        </span>
-        <button
-          type="button"
-          onClick={() => goTo(index + 1)}
-          aria-label="Next testimonial"
-          className="text-fg-muted hover:text-caramel"
-        >
-          ›
-        </button>
-      </div>
-    </div>
-  );
-}
-
 // ─── Live performance instrument ──────────────────────────────────────
 
 type VitalState = { value: number; rating: Metric["rating"] } | "measuring" | "waiting";
@@ -205,9 +138,12 @@ export function Proof() {
             <Counter key={i} value={m.value} suffix={m.suffix} label={m.label} />
           ))}
         </div>
-        <div className="mt-16 grid gap-12 lg:grid-cols-[1fr_320px]">
-          <TestimonialSlider />
-          <Instrument />
+        {/* Testimonial slider removed — the instrument panel is centred on
+            its own now that it's the only thing left below the stats row. */}
+        <div className="mt-16 flex justify-center">
+          <div className="w-full max-w-md">
+            <Instrument />
+          </div>
         </div>
       </div>
     </section>

@@ -41,8 +41,14 @@ export function Preloader() {
     const markEl = markRef.current;
     const sparkleEl = sparkleRef.current;
 
+    // markReady() (which starts the hero's entrance) fires from this same
+    // onComplete, once the bars have fully finished wiping away — not
+    // partway through, like before. That earlier overlap meant the hero
+    // animation was already partly playing, hidden behind the tail end of
+    // the preloader; now the sequence is strictly loader → gone → hero.
     const finish = () => {
       root.style.display = "none";
+      markReady();
     };
 
     const tl = gsap.timeline({ onComplete: finish });
@@ -60,13 +66,11 @@ export function Preloader() {
       )
       .to(sparkleEl, { opacity: 0.2, duration: 0.1, yoyo: true, repeat: 1, ease: "power1.inOut" }, 0.65)
       .to(markEl, { opacity: 0, scale: 0.9, duration: 0.25, ease: gsapEase.ui }, 0.85)
-      .to(bars, { yPercent: -100, duration: 0.35, ease: gsapEase.wipe, stagger: 0.035 }, 0.9)
-      .call(markReady, [], 1.04);
+      .to(bars, { yPercent: -100, duration: 0.35, ease: gsapEase.wipe, stagger: 0.035 }, 0.9);
 
     const skip = () => {
       tl.kill();
-      markReady();
-      finish();
+      finish(); // hides the overlay and calls markReady()
     };
 
     const onKey = (e: KeyboardEvent) => {
@@ -94,7 +98,7 @@ export function Preloader() {
         <div key={c} data-bar className={`flex-1 ${BAR_BG_CLASS[c]}`} style={{ transform: "scaleX(0)" }} />
       ))}
       <div ref={markRef} className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-0">
-        <div className="relative h-16 w-16 text-paper">
+        <div className="relative h-20 w-20 text-paper sm:h-28 sm:w-28">
           <Mark className="absolute inset-0" />
           <SparkleOverlay ref={sparkleRef} className="absolute inset-0 text-caramel" />
         </div>
